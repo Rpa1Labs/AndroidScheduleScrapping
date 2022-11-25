@@ -14,6 +14,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.widget.Button;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Calendar;
 
 public class EDTDownload {
@@ -49,15 +51,20 @@ public class EDTDownload {
             //check if the broadcast message is for our Enqueued download
             long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
 
-            if (m_downloadReference == referenceId){
+            String action = intent.getAction();
+
+            if (m_downloadReference == referenceId && DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)){
 
                 Log.d("COMPLETE","DOWNLOAD COMPLETE TRIGGERED");
 
                 try {
                     ParcelFileDescriptor file = m_downloadManager.openDownloadedFile(referenceId);
-                    file.close();
+                    FileInputStream fileStream = new FileInputStream(file.getFileDescriptor());
 
-                    m_edt.parse(Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DOWNLOADS + "/PolyApp/" + m_filename,Integer.valueOf(m_resourceID));
+
+                    m_edt.parse(fileStream,Integer.valueOf(m_resourceID));
+
+                    file.close();
 
 
                 } catch (Exception e) {
